@@ -1,5 +1,6 @@
 "use client"
 
+import userExists from "@/app/actions/getUser"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,17 +17,21 @@ import { Label } from "@/components/ui/label"
 import { Check, Copy, Plus, Share } from "lucide-react"
 import { useState } from "react"
 
-export function ShareBtn() {
+interface ShareButtonProps {
+  userId: string
+}
+export function ShareBtn(data: ShareButtonProps) {
 
   const [copied, setCopied] = useState(false);
   
-    const shareLink = `http://localhost:3000/shareall/`;
+    const shareLink = `http://localhost:3000/shareall/${data.userId}`;
   
     const handleCopy = async () => {
       await navigator.clipboard.writeText(shareLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     };
+
   return (
     <Dialog>
       <form>
@@ -53,7 +58,7 @@ export function ShareBtn() {
                     name="sharelink"
                     
                     readOnly
-                    value={`http://localhost:3000/shareall/`}
+                    value={`http://localhost:3000/shareall/${data.userId}`}
                     className="rounded-r-none"
                   />
                   <Button

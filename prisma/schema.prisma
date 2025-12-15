@@ -15,16 +15,17 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  image         String?
-  emailVerified DateTime?
-  accounts      Account[]
-  sessions      Session[]
-  contents      content[]
+  id                  String               @id @default(cuid())
+  name                String?
+  email               String               @unique
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  image               String?
+  emailVerified       DateTime?
+  accounts            Account[]
+  sessions            Session[]
+  contents            content[]
+  entireBrainLinkHash entireBrainLinkHash?
 }
 
 model Account {
@@ -73,15 +74,31 @@ enum ContentType {
 }
 
 model content {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  link        String
-  type        ContentType 
-  userId      String
-  tweetId     String?
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String              @id @default(cuid())
+  title               String
+  description         String
+  link                String
+  type                ContentType
+  userId              String
+  tweetId             String?
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  individulalLinkHash individualLinkHash?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
 }
 
+model individualLinkHash {
+  id        String   @id @default(cuid())
+  contentId String   @unique
+  content   content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model entireBrainLinkHash {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -6,6 +6,7 @@ import { ShareBtn } from "@/components/dashboard/topbar/sharebtn";
 import { ModeToggle } from "@/components/dashboard/topbar/theme-toggle";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
 import {ReactNode} from "react";
+import userExists from "../actions/getUser";
 
 // export default function Layout({children}: {children: ReactNode}) {
 //   return (
@@ -37,7 +38,13 @@ import {ReactNode} from "react";
 // }
 
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default async function Layout({ children }: { children: ReactNode }) {
+  const userInfo = await userExists();
+  const userId = userInfo?.user?.id;
+
+  if (!userId) {
+    return <div>Please log in to view your dashboard.</div>;
+  }
   return (
     <SidebarProvider>
       <div className="flex h-screen w-screen gap-1 bg-muted p-0.5 overflow-hidden">
@@ -58,7 +65,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
             <div className="flex items-center gap-2 shrink-0">
               <SearchBox />
-              <ShareBtn />
+              <ShareBtn userId={userId} />
               <AddContent />
               <ModeToggle />
             </div>

@@ -1,9 +1,9 @@
-import { getContentsByUserId } from "@/app/actions/content";
+import { createIndividualShareLinkHashContent, getContentsByUserId } from "@/app/actions/content";
 import userExists from "@/app/actions/getUser";
 import ContentCard from "@/components/dashboard/card/card";
 import { ContentType } from "@/lib/generated/prisma/enums";
 
-interface CreateContentInput {
+export interface CreateContentInput {
   id: string
   createdAt: Date
   link: string
@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   }
 
   const userDashboardContents = await getContentsByUserId(userId); // Replace with actual data fetching logic
-
+  
   return (
     <div className="flex flex-row gap-3.5 overflow-x-auto overflow-y-hidden p-0 thin-scrollbar">
       {/* <ContentCard /> */}

@@ -87,19 +87,55 @@ export async function deleteAllContentsByUserId(userId: string) {
   return deletedContents
 }
 
-export async function shareIndividualContent(contentId: string) {
-  const content = await prisma.content.findUnique({
-    where: {
-      id: contentId,
+// export async function shareIndividualContent(contentId: string) {
+//   const content = await prisma.content.findUnique({
+//     where: {
+//       id: contentId,
+//     },
+//   })
+//   if (!content) {
+//     throw new Error("Content not found")
+//   }
+//   // Logic to share content (e.g., generate a shareable link)
+//   const shareableLink = `https://yourbrain.in/content/${content.id}`
+//   return {
+//     ...content,
+//     shareableLink,
+//   }
+// }
+
+export async function createIndividualShareLinkHashContent(contentId: string) {
+  const individualHashRecord = await prisma.individualLinkHash.create({
+    data: {
+      contentId: contentId,
     },
   })
-  if (!content) {
-    throw new Error("Content not found")
-  }
-  // Logic to share content (e.g., generate a shareable link)
-  const shareableLink = `https://yourbrain.in/content/${content.id}`
-  return {
-    ...content,
-    shareableLink,
-  }
+  return individualHashRecord
+}
+
+export async function deleteIndividualShareLinkHashContentById(contentId: string) {
+  const deletedContent = await prisma.individualLinkHash.delete({
+    where: {
+      contentId: contentId,
+    },
+  })
+  return deletedContent
+}
+
+export async function createAllShareLinkHashContent(userId: string) {
+  const allHashRecord = await prisma.entireBrainLinkHash.create({
+    data: {
+      userId: userId,
+    },
+  })
+  return allHashRecord
+}
+
+export async function deleteAllShareLinkHashContentById(userId: string) {
+  const deletedContent = await prisma.entireBrainLinkHash.delete({
+    where: {
+      userId: userId,
+    },
+  })
+  return deletedContent
 }
