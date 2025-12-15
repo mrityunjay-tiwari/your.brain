@@ -1,6 +1,6 @@
 "use client";
 
-import React, {Suspense, useState} from "react";
+import React, {useState} from "react";
 import {Card, CardContent, CardHeader} from "@/components/ui/card";
 import {
   Dialog,
@@ -10,17 +10,14 @@ import {
   DialogFooter,
   DialogClose,
   DialogDescription,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
-import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
 import {
   Brain,
   Check,
   Copy,
-  Cross,
   Link as LinkIcon,
   Pencil,
   Share2,
@@ -29,17 +26,13 @@ import {
 } from "lucide-react";
 import {Tweet} from "react-tweet";
 import {
-  addContent,
   createIndividualShareLinkHashContent,
   deleteContentById,
   updateContentById,
 } from "@/app/actions/content";
 import {ContentType} from "@/lib/generated/prisma/enums";
-import {extractTweetId} from "@/utils/tweetId";
 import {useRouter} from "next/navigation";
 import {toast} from "sonner";
-import {Close} from "@radix-ui/react-dialog";
-import {MdOutlineClose} from "react-icons/md";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {Field, FieldError, FieldGroup, FieldLabel} from "@/components/ui/field";
 import {Controller, useForm} from "react-hook-form";
@@ -54,14 +47,6 @@ import z from "zod";
 import {formSchema} from "../topbar/addContent";
 import userExists from "@/app/actions/getUser";
 
-// Initial data
-const initialCardData = {
-  title: "Claude funny update",
-  description:
-    "Claude giving code without asking for is like forcing you to code the way it wants",
-  tweetId: "https://x.com/mrityunjay_18/status/1987415241425363234?s=20",
-};
-
 interface CreateContentInput {
   id: string;
   createdAt: Date;
@@ -75,43 +60,21 @@ interface CreateContentInput {
 export default function ContentCard(data: CreateContentInput) {
   const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [cardData, setCardData] = useState(initialCardData);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // Form state
-  const [formData, setFormData] = useState(initialCardData);
-  const [descCharCount, setDescCharCount] = useState(
-    initialCardData.description.length
-  );
-
-  // Open dialog logic
+  // Main Card Click Function
   const handleCardClick = () => {
-    setFormData(cardData);
-    setDescCharCount(cardData.description.length);
     setIsDialogOpen(true);
   };
 
-  // Stop click propagation for buttons/embeds
+  // Stop click propagation for buttons
   const stopPropagation = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
 
-  // const tweetId = extractTweetId(data.link);
-  // if (!tweetId) {
-  //   return <div>Invalid Tweet Link</div>;
-  // }
-
-  async function deleteCard() {
-    toast.message("Deleting content...", {
-      duration: 1500,
-    });
-    await deleteContentById(data.id);
-    router.refresh();
-    toast.success("Content deleted successfully!");
-  }
-
+  //  Edit Dialog Functions
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -129,7 +92,7 @@ export default function ContentCard(data: CreateContentInput) {
 
     setIsEditDialogOpen(false);
 
-    toast("You submitted the following values:", {
+    toast("You updated with the following values:", {
       description: (
         <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
           <code>{JSON.stringify(formData, null, 2)}</code>
@@ -162,15 +125,16 @@ export default function ContentCard(data: CreateContentInput) {
       type: "article",
       userId: userId,
     });
-    toast.success("Content added successfully!");
+    toast.success("Content updated successfully!");
 
     router.refresh();
   }
 
   // Share link Functions
   const [copied, setCopied] = useState(false);
+  const [hashId, setHashId] = useState("");
 
-  const shareLink = `http://localhost:3000/shareone/${data.id}`;
+  const [shareLink, setShareLink] = useState("");
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareLink);
@@ -178,12 +142,30 @@ export default function ContentCard(data: CreateContentInput) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleBrainShare = async () => {   
+    setIsShareDialogOpen(true);
+    const hash = await createIndividualShareLinkHashContent(data.id);
+    // console.log(hash.id);
+    setHashId(hash.id);
+    setShareLink(`http://localhost:3000/shareone/${hash.id}`);
+  }
+
+  // Delete Card Function
+  async function deleteCard() {
+    toast.message("Deleting content...", {
+      duration: 1500,
+    });
+    await deleteContentById(data.id);
+    router.refresh();
+    toast.success("Content deleted successfully!");
+  }
+
   return (
     <>
       <div className="min-h-screen flex items-center justify-left">
         <Card
           className="w-full md:w-[390px] h-full shadow-sm border border-gray-200 dark:border-inherit rounded-xl px-2 overflow-hidden cursor-pointer transition-shadow hover:shadow-md"
-          onClick={handleCardClick}
+          onClick={() => setIsDialogOpen(true)}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 py-0 -mb-8">
             <div className="flex items-center gap-2 overflow-hidden">
@@ -204,7 +186,7 @@ export default function ContentCard(data: CreateContentInput) {
                   <Button
                     className="hover:text-gray-100 hover:cursor-pointer bg-transparent transition-all text-gray-400 p-0 w-fit h-fit hover:scale-120 hover:bg-transparent"
                     size={"icon-sm"}
-                    onClick={() => setIsShareDialogOpen(true)}
+                    onClick={handleBrainShare}
                   >
                     <Share2 />
                   </Button>
@@ -242,12 +224,11 @@ export default function ContentCard(data: CreateContentInput) {
           </CardContent>
         </Card>
 
-        {/* --- Enlarge Content Dialog --- */}
+        {/* --- Enlarged Content Dialog --- */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="max-w-fit min-w-[650px] border-none shadow-none p-0.5 overflow-y-auto max-h-11/12 rounded-xl [&>button]:hidden thin-scrollbar">
             <Card
               className="w-full h-full shadow-sm border border-gray-200 dark:border-inherit rounded-xl px-2 overflow-hidden transition-shadow hover:shadow-md"
-              onClick={handleCardClick}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 py-0 -mb-8">
                 <div className="flex items-center gap-2 overflow-hidden">
@@ -458,8 +439,9 @@ export default function ContentCard(data: CreateContentInput) {
                     name="sharelink"
                     
                     readOnly
-                    value={`http://localhost:3000/shareone/${data.id}`}
+                    value={`${shareLink}`}
                     className="rounded-r-none"
+                    placeholder="Loading..."
                   />
                   <Button
                     type="button"
@@ -486,7 +468,7 @@ export default function ContentCard(data: CreateContentInput) {
           </DialogContent>
         </Dialog>
 
-        {/* --- Delete Dialog --- */}
+        {/* --- DeleteCard Dialog --- */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogContent>
             <DialogHeader>

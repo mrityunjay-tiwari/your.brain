@@ -105,12 +105,47 @@ export async function deleteAllContentsByUserId(userId: string) {
 // }
 
 export async function createIndividualShareLinkHashContent(contentId: string) {
+  const findAlreadyExists = await prisma.individualLinkHash.findUnique({
+    where: {
+      contentId: contentId,
+    },
+  })
+  if (findAlreadyExists) {
+    return findAlreadyExists
+  }
+  
   const individualHashRecord = await prisma.individualLinkHash.create({
     data: {
       contentId: contentId,
     },
   })
   return individualHashRecord
+}
+
+export async function createAllBrainShareLinkHashContent(userId: string) {
+  const findAlreadyExists = await prisma.entireBrainLinkHash.findUnique({
+    where: {
+      userId: userId,
+    },
+  })
+  if (findAlreadyExists) {
+    return findAlreadyExists
+  }
+  const allBrainHashRecord = await prisma.entireBrainLinkHash.create({
+    data: {
+      userId: userId,
+    },
+  })
+  return allBrainHashRecord
+}
+
+export async function getIndividualShareLinkHashContent(hashId: string) {
+  const hashRecord = await prisma.individualLinkHash.findUnique({
+    where: {
+      id: hashId,
+    },
+  })
+  return hashRecord
 }
 
 export async function deleteIndividualShareLinkHashContentById(contentId: string) {
@@ -122,15 +157,6 @@ export async function deleteIndividualShareLinkHashContentById(contentId: string
   return deletedContent
 }
 
-export async function createAllShareLinkHashContent(userId: string) {
-  const allHashRecord = await prisma.entireBrainLinkHash.create({
-    data: {
-      userId: userId,
-    },
-  })
-  return allHashRecord
-}
-
 export async function deleteAllShareLinkHashContentById(userId: string) {
   const deletedContent = await prisma.entireBrainLinkHash.delete({
     where: {
@@ -138,4 +164,13 @@ export async function deleteAllShareLinkHashContentById(userId: string) {
     },
   })
   return deletedContent
+}
+
+export async function getAllBrainShareLinkHashContent(hashId: string) {
+  const hashRecord = await prisma.entireBrainLinkHash.findUnique({
+    where: {
+      id: hashId,
+    },
+  })
+  return hashRecord
 }

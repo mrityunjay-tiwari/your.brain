@@ -1,16 +1,26 @@
-import {getIndividualContentById} from "@/app/actions/content";
+import {
+  getIndividualContentById,
+  getIndividualShareLinkHashContent,
+} from "@/app/actions/content";
 import ShareOneCardPage from "@/components/dashboard/card/shareOneCard";
 
 export default async function ShareOnePage({
   params,
 }: {
-  params: {contentId: string};
+  params: {hashId: string};
 }) {
-  const {contentId} = await params;
-  const data = await getIndividualContentById(contentId);
+  const {hashId} = await params;
 
+  const hash = await getIndividualShareLinkHashContent(hashId);
+  if (!hash) {
+    return <div>Invalid or expired share link.</div>;
+  }
+
+  const contentId = hash.contentId;
+
+  const data = await getIndividualContentById(contentId);
   if (!data) {
-    return <div>Content not found</div>;
+    return <div>Content not found.</div>;
   }
 
   return (

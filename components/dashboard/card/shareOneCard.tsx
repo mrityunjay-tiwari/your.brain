@@ -56,7 +56,7 @@ export default function ShareOneCardPage(data: CreateContentInput) {
         <DialogContent className="max-w-fit min-w-[650px] border-none shadow-none p-0.5 overflow-y-auto max-h-11/12 rounded-xl [&>button]:hidden thin-scrollbar">
           <Card
             className="w-full h-full shadow-sm border border-gray-200 dark:border-inherit rounded-xl px-2 overflow-hidden transition-shadow hover:shadow-md"
-            onClick={handleCardClick}
+            
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 py-0 -mb-8">
               <div className="flex items-center gap-2 overflow-hidden">
