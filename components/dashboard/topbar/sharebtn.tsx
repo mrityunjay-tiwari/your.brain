@@ -53,7 +53,7 @@ export function ShareBtn() {
                     name="sharelink"
                     
                     readOnly
-                    value={`http://localhost:3000/shareone/`}
+                    value={`http://localhost:3000/shareall/`}
                     className="rounded-r-none"
                   />
                   <Button
