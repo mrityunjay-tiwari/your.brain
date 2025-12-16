@@ -2,7 +2,7 @@ import {
   getIndividualContentById,
   getIndividualShareLinkHashContent,
 } from "@/app/actions/content";
-import ShareOneCardPage from "@/components/dashboard/card/shareOneCard";
+import ShareCard from "@/components/dashboard/card/shareCard";
 
 export default async function ShareOnePage({
   params,
@@ -25,7 +25,7 @@ export default async function ShareOnePage({
 
   return (
     <div className="max-w-screen justify-self-center">
-      <ShareOneCardPage
+      <ShareCard
         createdAt={data.createdAt}
         description={data.description}
         id={data.id}

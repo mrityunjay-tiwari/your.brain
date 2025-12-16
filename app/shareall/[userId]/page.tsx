@@ -3,7 +3,7 @@ import {
   getAllBrainShareLinkHashContent,
   getContentsByUserId,
 } from "@/app/actions/content";
-import ContentCard from "@/components/dashboard/card/card";
+import ShareCard from "@/components/dashboard/card/shareCard";
 
 export default async function ShareAllPage({
   params,
@@ -23,7 +23,7 @@ export default async function ShareAllPage({
     <div className="flex flex-row gap-3.5 overflow-x-auto overflow-y-hidden p-0 thin-scrollbar">
       {/* <ContentCard /> */}
       {userDashboardContents?.map((content: CreateContentInput) => (
-        <ContentCard
+        <ShareCard
           key={content.id}
           id={content.id}
           title={content.title}

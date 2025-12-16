@@ -18,7 +18,7 @@ interface CreateContentInput {
   userId: string;
 }
 
-export default function ShareOneCardPage(data: CreateContentInput) {
+export default function ShareCard(data: CreateContentInput) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleCardClick = () => {

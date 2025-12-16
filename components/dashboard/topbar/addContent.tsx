@@ -132,7 +132,7 @@ export function AddContent() {
         <Button
           onClick={handleCardClick}
           variant="outline"
-          className="bg-blue-600 text-white font-normal flex items-center hover:bg-blue-400 hover:text-white"
+          className="bg-blue-600 hover:cursor-pointer text-white font-normal flex items-center hover:bg-blue-400 hover:text-white"
         >
           <Plus /> AddContent
         </Button>

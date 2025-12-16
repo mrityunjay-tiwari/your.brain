@@ -40,8 +40,8 @@ export function SearchBox() {
 
   return (
     <>
-      <p className="text-muted-foreground text-sm">
-        <Button className="flex items-center bg-muted font-normal" variant={'outline'} onClick={() => setOpen(!open)}>
+      <p className="text-muted-foreground text-sm hover:cursor-pointer">
+        <Button className="flex items-center bg-muted font-normal hover:cursor-pointer" variant={'outline'} onClick={() => setOpen(!open)}>
           <Search /><p className="mr-5">Search here...</p>
           
           <kbd className="justify-center bg-muted text-muted-foreground pointer-events-none flex h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none">

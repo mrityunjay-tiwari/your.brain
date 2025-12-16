@@ -28,6 +28,7 @@ import {Tweet} from "react-tweet";
 import {
   createIndividualShareLinkHashContent,
   deleteContentById,
+  deleteIndividualShareLinkHashContentById,
   updateContentById,
 } from "@/app/actions/content";
 import {ContentType} from "@/lib/generated/prisma/enums";
@@ -46,6 +47,8 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import z from "zod";
 import {formSchema} from "../topbar/addContent";
 import userExists from "@/app/actions/getUser";
+import {Switch} from "@/components/ui/switch";
+import {IoMdInformationCircleOutline} from "react-icons/io";
 
 interface CreateContentInput {
   id: string;
@@ -142,13 +145,34 @@ export default function ContentCard(data: CreateContentInput) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleBrainShare = async () => {   
+  const handleBrainShare = async () => {
     setIsShareDialogOpen(true);
     const hash = await createIndividualShareLinkHashContent(data.id);
     // console.log(hash.id);
     setHashId(hash.id);
     setShareLink(`http://localhost:3000/shareone/${hash.id}`);
-  }
+  };
+
+  const [isOn, setIsOn] = useState(false);
+
+  const handleToggle = async (checked: boolean) => {
+    setIsOn(checked);
+
+    // 👉 Do something based on switch state
+    if (checked) {
+      console.log("Switch ON");
+      // e.g. enable feature, call API, update theme, etc.
+      await deleteIndividualShareLinkHashContentById(data.id);
+    } else {
+      console.log("Switch OFF");
+      setShareLink("Loading...");
+      const hash = await createIndividualShareLinkHashContent(data.id);
+      // console.log(hash.id);
+
+      setShareLink(`http://localhost:3000/shareone/${hash.id}`);
+      // e.g. disable feature
+    }
+  };
 
   // Delete Card Function
   async function deleteCard() {
@@ -227,9 +251,7 @@ export default function ContentCard(data: CreateContentInput) {
         {/* --- Enlarged Content Dialog --- */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="max-w-fit min-w-[650px] border-none shadow-none p-0.5 overflow-y-auto max-h-11/12 rounded-xl [&>button]:hidden thin-scrollbar">
-            <Card
-              className="w-full h-full shadow-sm border border-gray-200 dark:border-inherit rounded-xl px-2 overflow-hidden transition-shadow hover:shadow-md"
-            >
+            <Card className="w-full h-full shadow-sm border border-gray-200 dark:border-inherit rounded-xl px-2 overflow-hidden transition-shadow hover:shadow-md">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 py-0 -mb-8">
                 <div className="flex items-center gap-2 overflow-hidden">
                   <div className="text-gray-800 dark:text-inherit shrink-0">
@@ -432,22 +454,53 @@ export default function ContentCard(data: CreateContentInput) {
               <Input id="name-1" name="name" defaultValue="Pedro Duarte" />
             </div> */}
               <div className="grid gap-3">
-                <Label htmlFor="share-link">Link</Label>
+                <div className="flex justify-between">
+                  <Label htmlFor="share-link">Link</Label>
+                  <div className="flex gap-1.5">
+                    <Label
+                      htmlFor="airplane-mode"
+                      className="cursor-pointer font-normal text-xs text-zinc-400"
+                    >
+                      {isOn ? "Start Sharing" : "Stop Sharing"}
+                    </Label>
+
+                    <Switch
+                      id="airplane-mode"
+                      checked={isOn}
+                      onCheckedChange={handleToggle}
+                    />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className="hover:text-gray-100 hover:cursor-pointer text-gray-400 bg-transparent p-0 hover:bg-transparent"
+                          size={"icon-xs"}
+                        >
+                          <IoMdInformationCircleOutline className="text-zinc-500 h-0.5 w-0.5 scale-[0.8] origin-center" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-red-600">Stop Sharing Toggle deletes the current link.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
                 <div className="flex items-center justify-center">
                   <Input
                     id="share-link"
                     name="sharelink"
-                    
                     readOnly
-                    value={`${shareLink}`}
+                    value={isOn ? `` : `${shareLink}`}
                     className="rounded-r-none"
-                    placeholder="Loading..."
+                    placeholder={
+                      isOn ? `Start sharing to generate link` : `Loading...`
+                    }
                   />
                   <Button
                     type="button"
                     size="icon"
                     variant="ghost"
-                    onClick={handleCopy}
+                    onClick={isOn ? undefined : handleCopy}
+                    disabled={isOn}
                     className="border border-l-0 rounded-l-none p-0 bg-zinc-900"
                   >
                     {copied ? (
@@ -476,16 +529,14 @@ export default function ContentCard(data: CreateContentInput) {
             </DialogHeader>
 
             <DialogFooter>
-              
-                <Button
-                  type="submit"
-                  size={'sm'}
-                  onClick={deleteCard}
-                  className="hover:cursor-pointer text-white bg-red-400 hover:bg-red-900 hover:scale-105"
-                >
-                  Yes, Delete
-                </Button>
-              
+              <Button
+                type="submit"
+                size={"sm"}
+                onClick={deleteCard}
+                className="hover:cursor-pointer text-white bg-red-400 hover:bg-red-900 hover:scale-105"
+              >
+                Yes, Delete
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
