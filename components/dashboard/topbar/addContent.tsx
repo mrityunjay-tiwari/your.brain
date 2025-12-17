@@ -28,7 +28,9 @@ import {
 } from "@/components/ui/input-group";
 import {addContent, getContentsByUserId} from "@/app/actions/content";
 import userExists from "@/app/actions/getUser";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
+import ProjectsAddDropdown from "../card/projects-dropdown";
+import LinkCategoryDropdown from "../card/link-category-dropdown";
 
 // Initial data
 const initialCardData = {
@@ -139,7 +141,7 @@ export function AddContent() {
         {/* --- Edit Dialog (Same as before) --- */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           {/* <Card className="w-full sm:max-w-md shadow-none border-0"> */}
-          <DialogContent>
+          <DialogContent className="overflow-y-auto">
             <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
               <FieldGroup>
                 <Controller
@@ -218,6 +220,10 @@ export function AddContent() {
                     </Field>
                   )}
                 />
+                <div className="flex justify-between gap-5">
+                  <LinkCategoryDropdown />
+                  <ProjectsAddDropdown />
+                </div>
                 <div className="flex gap-5">
                   <Button
                     type="button"

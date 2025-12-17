@@ -19,7 +19,7 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        define: 'bg-primary/50 text-primary-foreground bg-linear-to-b dark:from-primary/75 dark:bg-linear-to-t border border-zinc-950/35 ring-0 transition-[filter] duration-200 hover:brightness-150 active:brightness-95 dark:border-0 dark:border-zinc-950/50'
+        define: 'bg-primary/50 text-primary-foreground bg-linear-to-b dark:from-primary/20 dark:bg-linear-to-t border border-zinc-950/35 ring-0 transition-[filter] duration-200 hover:brightness-150 active:brightness-95 dark:border-0 dark:border-zinc-950/50'
 
       },
       size: {

@@ -26,6 +26,7 @@ model User {
   sessions            Session[]
   contents            content[]
   entireBrainLinkHash entireBrainLinkHash?
+  projects            Project[]
 }
 
 model Account {
@@ -85,6 +86,8 @@ model content {
   individulalLinkHash individualLinkHash?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
+  projectId           String?
+  project             ProjectsContent[]
 }
 
 model individualLinkHash {
@@ -99,6 +102,47 @@ model entireBrainLinkHash {
   id        String   @id @default(cuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id           String            @id @default(cuid())
+  projectsname String
+  contents     ProjectsContent[]
+  projectNotes ProjectNote?
+  projectChat  ProjectChat?
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model ProjectsContent {
+  id        String   @id @default(cuid())
+  projectId String
+  contentId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  content   content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, contentId])
+}
+
+model ProjectNote {
+  id        String   @id @default(cuid())
+  note      String
+  projectId String   @unique
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectChat {
+  id String @id @default(cuid())
+  projectId String  @unique
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

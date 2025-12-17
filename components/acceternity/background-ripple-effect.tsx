@@ -24,7 +24,7 @@ export const BackgroundRippleEffect = ({
       className={cn(
         "absolute inset-0 h-full w-full z-0",
         "[--cell-border-color:var(--color-zinc-100)] [--cell-fill-color:var(--color-neutral-300)] [--cell-shadow-color:var(--color-neutral-600)]",
-        "dark:[--cell-border-color:var(--color-neutral-800)] dark:[--cell-fill-color:var(--color-neutral-900)] dark:[--cell-shadow-color:var(--color-neutral-800)]",
+        "dark:[--cell-border-color:var(--color-neutral-700)] dark:[--cell-fill-color:var(--color-neutral-800)] dark:[--cell-shadow-color:var(--color-neutral-800)]",
       )}
     >
       <div className="relative h-auto w-auto overflow-hidden">

@@ -14,9 +14,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {signOut} from "@/utils/auth";
-import {ChevronUp, User2} from "lucide-react";
+import {ChevronDown, ChevronUp, User2} from "lucide-react";
 import {LogOutDialog} from "./logout";
-import {Children, Suspense} from "react";
+import {Children, Suspense, useState} from "react";
 import Image from "next/image";
 
 interface FooterClientProps {
@@ -25,15 +25,17 @@ interface FooterClientProps {
   children?: React.ReactNode;
 }
 export default function FooterClient(props: FooterClientProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <SidebarFooter>
       <SidebarMenu>
         <SidebarMenuItem>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <SidebarMenuButton>
+          <DropdownMenu open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DropdownMenuTrigger asChild >
+              <SidebarMenuButton >
                 <Image src={props.image}  alt="logo" width={25} height={25} className="object-cover rounded-full" /> {props.user} 
-                <ChevronUp className="ml-auto" />
+                {isDialogOpen ? <ChevronDown className="ml-auto" /> :<ChevronUp className="ml-auto" />}
               </SidebarMenuButton>
             </DropdownMenuTrigger>
 

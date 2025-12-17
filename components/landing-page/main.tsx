@@ -1,3 +1,5 @@
+"use client"
+
 import FAQsSection from "./faqs";
 import FooterSection from "./footer";
 import {FeaturesPage} from "./features";
@@ -11,8 +13,7 @@ export function LandingPage() {
       <HeroSection />
       {/* <ScrollPage /> */}
       <FAQsSection />
-      <FeaturesPage />
-      <FooterSection />
+      {/* <FeaturesPage /> */}
     </div>
   );
 }

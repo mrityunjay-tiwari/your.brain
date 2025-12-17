@@ -43,6 +43,7 @@ import {Menu, X} from "lucide-react";
 import React from "react";
 import {cn} from "@/lib/utils";
 import Image from "next/image";
+import {ModeToggle} from "../dashboard/topbar/theme-toggle-landing-page";
 
 const menuItems = [
   {name: "Features", href: "#link"},
@@ -89,6 +90,14 @@ export const HeroHeader = () => {
                   }
                   width={100}
                   height={50}
+                  className="block dark:hidden"
+                />
+                <Image
+                  src="https://ik.imagekit.io/mrityunjay/1k_+-removebg-preview.png"
+                  alt="logo-dark"
+                  width={120}
+                  height={50}
+                  className="hidden dark:block"
                 />
               </Link>
 
@@ -173,6 +182,18 @@ export const HeroHeader = () => {
                   <Link href="/signin">
                     <span>Sign Up</span>
                   </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant={"outline"}
+                  size="lg"
+                  className={cn(
+                    isScrolled
+                      ? "rounded-full lg:inline-flex"
+                      : "rounded-full hidden"
+                  )}
+                >
+                  <ModeToggle />
                 </Button>
               </div>
             </div>

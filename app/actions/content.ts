@@ -174,3 +174,25 @@ export async function getAllBrainShareLinkHashContent(hashId: string) {
   })
   return hashRecord
 }
+
+type CreateProjectInput = {
+  title: string
+  userId: string
+}
+
+export async function createNewProject(data: CreateProjectInput) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+  const project = await prisma.project.create({
+    data: {
+      projectsname: data.title,
+      userId: session.user.id,
+    },
+  })  
+  return {
+    msg: "Project created successfully",
+    project,
+  }
+}

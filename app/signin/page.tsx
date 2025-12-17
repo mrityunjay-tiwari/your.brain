@@ -1,5 +1,5 @@
-import { AuthButton, AuthButtonGithub } from "@/components/signin/custombuttons";
-import { signIn } from "@/utils/auth";
+import {AuthButton, AuthButtonGithub} from "@/components/signin/custombuttons";
+import {signIn} from "@/utils/auth";
 import {GitBranch} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,12 +11,27 @@ export default async function LoginPage() {
         <div className="p-6">
           <div>
             <Link href="/" aria-label="go home">
-              <Image src={'https://ik.imagekit.io/mrityunjay/your_brain__3_-removebg-preview.png?updatedAt=1763637324508'} alt="" width={75} height={50} />
+              <Image
+                src={
+                  "https://ik.imagekit.io/mrityunjay/your_brain__3_-removebg-preview.png?updatedAt=1763637324508"
+                }
+                alt=""
+                width={75}
+                height={50}
+                className="block dark:hidden"
+              />
+              <Image
+                src="https://ik.imagekit.io/mrityunjay/1k_+-removebg-preview.png"
+                alt="logo-dark"
+                width={100}
+                height={50}
+                className="hidden dark:block"
+              />
             </Link>
             <h1 className="mb-0.5 mt-4 text-xl font-medium">
               Welcome to yourBrain!
             </h1>
-            <p className="text-gray-700">Login to get started</p>
+            <p className="text-gray-700 dark:text-inherit">Login to get started</p>
           </div>
 
           <form
@@ -28,7 +43,7 @@ export default async function LoginPage() {
           >
             <AuthButton />
           </form>
-          <form
+          {/* <form
             action={async () => {
               "use server";
               await signIn("github", {redirectTo: "/dashboard"});
@@ -36,7 +51,7 @@ export default async function LoginPage() {
             className="mt-6"
           >
             <AuthButtonGithub />
-          </form>
+          </form> */}
         </div>
       </div>
     </section>

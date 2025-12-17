@@ -52,7 +52,7 @@ export default function HeroSection() {
         </div>
         <section>
           <div className="relative pt-24 md:pt-36">
-            <AnimatedGroup
+            {/* <AnimatedGroup
               variants={{
                 container: {
                   visible: {
@@ -86,7 +86,7 @@ export default function HeroSection() {
                 width="3276"
                 height="4095"
               />
-            </AnimatedGroup>
+            </AnimatedGroup> */}
 
             <BackgroundRippleEffect />
             {/* <div
@@ -130,7 +130,7 @@ export default function HeroSection() {
                     speedSegment={0.3}
                     as="h1"
                     className={cn(
-                      `ml-auto mt-8 max-w-4xl text-neutral-900/80 text-4xl md:font-thin md:text-7xl lg:mt-16 xl:text-[5rem], ${ubuntu.className}`
+                      `ml-auto mt-8 max-w-4xl dark:text-inherit text-neutral-900/80 text-4xl md:font-thin md:text-7xl lg:mt-16 xl:text-[5rem], ${ubuntu.className}`
                     )}
                   >
                     {`Your `}
@@ -140,7 +140,7 @@ export default function HeroSection() {
                     speedSegment={0.3}
                     as="h1"
                     className={cn(
-                      `mr-auto mt-8 max-w-4xl text-blue-800/80 text-4xl md:font-medium md:text-7xl lg:mt-16 xl:text-[5rem], ${ubuntu.className}`
+                      `mr-auto mt-8 max-w-4xl text-blue-800/80 dark:text-blue-700/80 text-4xl md:font-medium md:text-7xl lg:mt-16 xl:text-[5rem], ${ubuntu.className}`
                     )}
                   >
                     Second Brain
@@ -153,7 +153,7 @@ export default function HeroSection() {
                   speedSegment={0.3}
                   delay={0.5}
                   as="p"
-                  className="mx-auto mt-8 max-w-2xl text-gray-800/60 text-2xl"
+                  className="mx-auto mt-8 max-w-2xl text-gray-800/60 dark:text-inherit text-2xl"
                 >
                   {`Custom Save what you need to revisit!`}
                 </TextEffect>
@@ -163,7 +163,7 @@ export default function HeroSection() {
                   speedSegment={0.3}
                   delay={0.5}
                   as="p"
-                  className="text-nowrap mx-auto mt-1 max-w-2xl text-gray-800/60 text-xl"
+                  className="text-nowrap mx-auto mt-1 max-w-2xl dark:text-inherit text-gray-800/60 text-xl"
                 >
                   {`"Smart way to save and retrive, what you may forget otherwise."`}
                 </TextEffect>
@@ -190,7 +190,7 @@ export default function HeroSection() {
                       asChild
                       size="lg"
                       variant="define"
-                      className=" px-10 py-5 text-base bg-blue-900 rounded-xl shadow-[0_25px_40px_-10px_rgba(0,0,0,1),0_0_40px_-5px_rgba(0,0,0,0)]"
+                      className=" px-10 py-5 text-base text-white bg-blue-900 rounded-xl shadow-[0_25px_40px_-10px_rgba(0,0,0,1),0_0_40px_-5px_rgba(0,0,0,0)]"
                     >
                       <Link href="/signin">
                         <span className="text-nowrap flex items-center justify-center gap-1">
@@ -218,13 +218,13 @@ export default function HeroSection() {
             >
               <div className="mask-b-from-55% relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
                 <div className="flex justify-center items-center inset-shadow-2xl ring-background dark:inset-shadow-white/15 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/50 ring-1">
-                  {/* <Image
+                  <Image
                     className="bg-background aspect-auto relative hidden rounded-2xl dark:block"
                     src="https://ik.imagekit.io/mrityunjay/Screenshot%202025-07-30%20114911.png?updatedAt=1753857136729"
                     alt="app screen"
-                    width="0"
-                    height="0"
-                  /> */}
+                    width="1150"
+                    height="2"
+                  />
                   <Image
                     className="z-2 border aspect-auto relative rounded-2xl border dark:hidden shadow-xl"
                     src="https://ik.imagekit.io/mrityunjay/Screenshot%202025-07-30%20114911.png?updatedAt=1753857136729"

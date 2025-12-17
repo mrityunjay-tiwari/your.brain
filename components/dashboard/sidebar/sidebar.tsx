@@ -39,8 +39,24 @@ import {cn} from "@/lib/utils";
 import {usePathname} from "next/navigation";
 import {DropdownMenu} from "@/components/ui/dropdown-menu";
 import {Footer} from "./footer-sidebar";
-import {Suspense} from "react";
+import {Suspense, useState} from "react";
 import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {Field, FieldError, FieldGroup, FieldLabel} from "@/components/ui/field";
+import {Controller, useForm} from "react-hook-form";
+import {Input} from "@/components/ui/input";
+import z from "zod";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {toast} from "sonner";
+import {createNewProject} from "@/app/actions/content";
+import userExists from "@/app/actions/getUser";
 
 // Menu items.
 const items = [
@@ -79,8 +95,45 @@ const projects = [
   },
 ];
 
+export const addTitleFormSchema = z.object({
+  title: z
+    .string()
+    .min(1, "Bug title must be at least 1 characters.")
+    .max(200, "Bug title must be at most 200 characters."),
+});
+
 export function AppSidebar({children}: {children?: React.ReactNode}) {
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+
   const pathname = usePathname();
+
+  const form = useForm<z.infer<typeof addTitleFormSchema>>({
+    resolver: zodResolver(addTitleFormSchema),
+    defaultValues: {
+      title: "",
+    },
+  });
+
+  const onSubmit = async (data: z.infer<typeof addTitleFormSchema>) => {
+    console.log("Creating new project...");
+    toast.loading("Creating new project...");
+    const user = await userExists();
+    if (!user) {
+      toast.error("User does not exist. Please log in.");
+      return;
+    }
+    const userId = user.user?.id;
+    if (!userId) {
+      toast.error("User ID not found. Please log in.");
+      return;
+    }
+    await createNewProject({
+      title: data.title,
+      userId: userId, // Replace with actual user ID
+    });
+    toast.success("Project created successfully!");
+    setIsCreateProjectOpen(false);
+  };
 
   return (
     <Sidebar>
@@ -164,14 +217,73 @@ export function AppSidebar({children}: {children?: React.ReactNode}) {
       <SidebarFooter>
         <SidebarMenuItem>
           <SidebarMenuButton>
-            <Link href={"/create"}>
+            <div onClick={() => setIsCreateProjectOpen(true)}>
               <span className="flex gap-1 items-center font-medium">
                 <Plus className="size-5 font-light" /> Create Project
               </span>
-            </Link>
+            </div>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarFooter>
+
+      {/* Create New Project Dialog */}
+      <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+          </DialogHeader>
+          <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
+            <FieldGroup>
+              <Controller
+                name="title"
+                control={form.control}
+                render={({field, fieldState}) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      htmlFor="form-rhf-demo-title"
+                      className="font-normal"
+                    >
+                      Title
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      // id="form-rhf-demo-title"
+                      // aria-invalid={fieldState.invalid}
+                      placeholder="Put project title here"
+                      // autoComplete="off"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <div className="flex gap-5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => form.reset()}
+                >
+                  Reset
+                </Button>
+                <Button type="submit" form="form-rhf-demo">
+                  Submit
+                </Button>
+              </div>
+            </FieldGroup>
+          </form>
+          {/* <DialogFooter>
+            <Button
+              type="submit"
+              size={"sm"}
+              className="hover:cursor-pointer text-white bg-red-400 hover:bg-red-900 hover:scale-105"
+            >
+              Yes, Delete
+            </Button>
+          </DialogFooter> */}
+        </DialogContent>
+      </Dialog>
       {children}
       {/* <Footer>
 
