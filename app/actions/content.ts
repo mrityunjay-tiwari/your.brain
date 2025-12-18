@@ -196,3 +196,54 @@ export async function createNewProject(data: CreateProjectInput) {
     project,
   }
 }
+
+export async function getProjectsByUserId(userId : string) {
+  const projects = await prisma.project.findMany({
+    where : {
+      userId: userId
+    },
+    orderBy: {
+      createdAt: "asc"
+    }
+  })
+
+  return {
+    msg: "User Projects",
+    projects
+  }
+}
+
+export async function getProjectBrainCardsByProjectId(projectId: string) {
+  const projectContentCards = await prisma.projectsContent.findMany({
+    where : {
+      projectId: projectId
+    },
+    orderBy : {
+      createdAt : "asc"
+    }
+  })
+
+  
+  const brainCards = projectContentCards.map(async (brainCard) => {
+    const card = await prisma.content.findMany({
+      where: {
+        id: brainCard.contentId
+      }
+    }) 
+  })
+  
+} 
+
+export async function getProjectDetailsByProjectId(projectId: string) {
+  // const project = await prisma.project.findUnique({
+  //   where: {
+  //     id : projectId
+  //   }
+  // })
+
+  // return {
+  //   msg : "Project Details",
+  //   project
+  // }
+
+}

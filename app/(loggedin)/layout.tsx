@@ -7,6 +7,21 @@ import { ModeToggle } from "@/components/dashboard/topbar/theme-toggle";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
 import {ReactNode} from "react";
 import userExists from "../actions/getUser";
+import DashboardNavbar from "@/components/dashboard/topbar/main";
+import { HeroHeader } from "@/components/dashboard/topbar/topbar";
+import {
+  AudioWaveform,
+  BookOpen,
+  Bot,
+  Command,
+  Frame,
+  GalleryVerticalEnd,
+  Map,
+  PieChart,
+  Settings2,
+  SquareTerminal,
+} from "lucide-react";
+import { getProjectBrainCardsByProjectId, getProjectsByUserId } from "../actions/content";
 
 // export default function Layout({children}: {children: ReactNode}) {
 //   return (
@@ -37,6 +52,95 @@ import userExists from "../actions/getUser";
 //   );
 // }
 
+const data = {
+  navMain: [
+    {
+      title: "Playground",
+      url: "#",
+      icon: "P",
+      // isActive: true,
+      items: [
+        {
+          title: "History",
+          url: "#",
+        },
+        {
+          title: "Starred",
+          url: "#",
+        },
+        {
+          title: "Settings",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Models",
+      url: "#",
+      icon: "P",
+      items: [
+        {
+          title: "Genesis",
+          url: "#",
+        },
+        {
+          title: "Explorer",
+          url: "#",
+        },
+        {
+          title: "Quantum",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Documentation",
+      url: "#",
+      icon: "P",
+      items: [
+        {
+          title: "Introduction",
+          url: "#",
+        },
+        {
+          title: "Get Started",
+          url: "#",
+        },
+        {
+          title: "Tutorials",
+          url: "#",
+        },
+        {
+          title: "Changelog",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Settings",
+      url: "#",
+      icon: "P",
+      items: [
+        {
+          title: "General",
+          url: "#",
+        },
+        {
+          title: "Team",
+          url: "#",
+        },
+        {
+          title: "Billing",
+          url: "#",
+        },
+        {
+          title: "Limits",
+          url: "#",
+        },
+      ],
+    },
+  ],
+};
 
 export default async function Layout({ children }: { children: ReactNode }) {
   const userInfo = await userExists();
@@ -45,13 +149,21 @@ export default async function Layout({ children }: { children: ReactNode }) {
   if (!userId) {
     return <div>Please log in to view your dashboard.</div>;
   }
+
+  const userProjects = await getProjectsByUserId(userId)
+  userProjects.projects.map(async(project) => {
+    console.log(`${project.id} : ${project.projectsname}`);
+    
+    
+    
+  })
   return (
     <SidebarProvider>
       <div className="flex h-screen w-screen gap-1 bg-muted p-0.5 overflow-hidden">
 
         {/* Sidebar */}
         <div className="shrink-0">
-          <AppSidebar>
+          <AppSidebar projectItems={data.navMain}>
             <Footer />
           </AppSidebar>
         </div>
@@ -60,17 +172,18 @@ export default async function Layout({ children }: { children: ReactNode }) {
         <div className="flex flex-1 min-w-0 flex-col gap-0.5">
 
           {/* Top Bar */}
-          <div className="flex w-full min-w-0 items-center justify-between rounded-md bg-white dark:bg-inherit py-4 pr-2 overflow-hidden">
-            <SidebarTrigger />
+          {/* <div className="flex w-full min-w-0 items-center justify-between rounded-md bg-white dark:bg-inherit py-4 pr-2 "> */}
+            {/* <SidebarTrigger /> */}
 
-            <div className="flex items-center gap-2 shrink-0">
-              <SearchBox />
-              <ShareBtn userId={userId} />
+            {/* <div className="flex items-center gap-2 shrink-0 z-30"> */}
+              {/* <SearchBox /> */}
+              {/* <ShareBtn userId={userId} />
               <AddContent />
-              <ModeToggle />
-            </div>
-          </div>
-
+              <ModeToggle /> */}
+              {/* <DashboardNavbar userId={userId} /> */}
+            {/* </div> */}
+          {/* </div> */}
+                <HeroHeader userId={userId} />
           {/* Page Content */}
           <div className="flex-1 w-full min-w-0 overflow-x-auto overflow-y-scroll rounded-md bg-white dark:bg-inherit p-2 thin-scrollbar">
             {children}

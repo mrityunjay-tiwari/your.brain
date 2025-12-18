@@ -95,7 +95,7 @@ export default function HeroSection() {
                 /> */}
             <div className="mx-auto max-w-7xl px-6">
               <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
-                <AnimatedGroup variants={transitionVariants}>
+                <AnimatedGroup variants={transitionVariants} className="pt-5 md:pt-0">
                   <Link
                     href="#link"
                     className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950"
@@ -105,7 +105,7 @@ export default function HeroSection() {
                         <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-in z-10 absolute justify-self-center"></div>
                         <div className="w-2.5 h-2.5 rounded-full bg-blue-300 animate-[ping_1.5s_ease-in-out_infinite] absolute justify-self-center"></div>
                       </div>
-                      <div className="flex items-center gap-0.5">
+                      <div className="text-xs md:text-sm flex items-center gap-0.5">
                         Introducing Chat on Your Contents
                       </div>
                     </span>
@@ -124,13 +124,13 @@ export default function HeroSection() {
                   </Link>
                 </AnimatedGroup>
 
-                <div className="flex">
+                <div className="pt-12 md:pt-0 flex">
                   <TextEffect
                     preset="fade-in-blur"
                     speedSegment={0.3}
                     as="h1"
                     className={cn(
-                      `ml-auto mt-8 max-w-4xl dark:text-inherit text-neutral-900/80 text-4xl md:font-thin md:text-7xl lg:mt-16 xl:text-[5rem], ${ubuntu.className}`
+                      `ml-auto mt-8 max-w-4xl dark:text-inherit text-neutral-900/80 text-4xl font-thin md:text-7xl lg:mt-16 xl:text-[5rem], ${ubuntu.className}`
                     )}
                   >
                     {`Your `}
@@ -140,7 +140,7 @@ export default function HeroSection() {
                     speedSegment={0.3}
                     as="h1"
                     className={cn(
-                      `mr-auto mt-8 max-w-4xl text-blue-800/80 dark:text-blue-700/80 text-4xl md:font-medium md:text-7xl lg:mt-16 xl:text-[5rem], ${ubuntu.className}`
+                      `mr-auto mt-8 max-w-4xl text-blue-800/80 dark:text-blue-700/80 text-4xl font-medium md:text-7xl lg:mt-16 xl:text-[5rem], ${ubuntu.className}`
                     )}
                   >
                     Second Brain
@@ -153,7 +153,7 @@ export default function HeroSection() {
                   speedSegment={0.3}
                   delay={0.5}
                   as="p"
-                  className="mx-auto mt-8 max-w-2xl text-gray-800/60 dark:text-inherit text-2xl"
+                  className="mx-auto mt-8 max-w-2xl text-gray-800/60 dark:text-inherit md:text-2xl"
                 >
                   {`Custom Save what you need to revisit!`}
                 </TextEffect>
@@ -163,7 +163,7 @@ export default function HeroSection() {
                   speedSegment={0.3}
                   delay={0.5}
                   as="p"
-                  className="text-nowrap mx-auto mt-1 max-w-2xl dark:text-inherit text-gray-800/60 text-xl"
+                  className="md:text-nowrap mx-auto mt-1 max-w-2xl dark:text-inherit text-gray-800/60 md:text-xl"
                 >
                   {`"Smart way to save and retrive, what you may forget otherwise."`}
                 </TextEffect>
@@ -215,6 +215,7 @@ export default function HeroSection() {
                 },
                 ...transitionVariants,
               }}
+              className="hidden md:inline"
             >
               <div className="mask-b-from-55% relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
                 <div className="flex justify-center items-center inset-shadow-2xl ring-background dark:inset-shadow-white/15 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/50 ring-1">
@@ -226,7 +227,7 @@ export default function HeroSection() {
                     height="2"
                   />
                   <Image
-                    className="z-2 border aspect-auto relative rounded-2xl border dark:hidden shadow-xl"
+                    className="z-2 aspect-auto relative rounded-2xl border dark:hidden shadow-xl"
                     src="https://ik.imagekit.io/mrityunjay/Screenshot%202025-07-30%20114911.png?updatedAt=1753857136729"
                     alt="app screen"
                     width="1150"

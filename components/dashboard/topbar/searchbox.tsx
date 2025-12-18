@@ -44,12 +44,12 @@ export function SearchBox() {
         <Button className="flex items-center bg-muted font-normal hover:cursor-pointer" variant={'outline'} onClick={() => setOpen(!open)}>
           <Search /><p className="mr-5">Search here...</p>
           
-          <kbd className="justify-center bg-muted text-muted-foreground pointer-events-none flex h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none">
+          <kbd className="hidden sm:inline justify-center bg-muted text-muted-foreground pointer-events-none  h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none">
             <span className="text-xs">⌘</span>K
           </kbd>
         </Button>
       </p>
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog open={open} onOpenChange={setOpen} className="thin-scrollbar">
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>

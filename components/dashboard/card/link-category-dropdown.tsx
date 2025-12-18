@@ -242,6 +242,7 @@ function LinkCategoryDropdown({
                   <Button
                     className="hover:text-gray-100 hover:cursor-pointer text-gray-400 bg-transparent p-0 hover:bg-transparent"
                     size={"icon-xs"}
+                    type="button"
                   >
                     <VscNewFolder className="text-zinc-500 h-4 w-4 scale-[1] origin-center" />
                   </Button>

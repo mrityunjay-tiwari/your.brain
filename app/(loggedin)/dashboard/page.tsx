@@ -4,6 +4,7 @@ import {
 } from "@/app/actions/content";
 import userExists from "@/app/actions/getUser";
 import ContentCard from "@/components/dashboard/card/card";
+import { HeroHeader } from "@/components/dashboard/topbar/topbar";
 import {ContentType} from "@/lib/generated/prisma/enums";
 
 export interface CreateContentInput {
@@ -29,6 +30,7 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-row gap-3.5 overflow-x-auto overflow-y-hidden p-0 thin-scrollbar">
       {/* <ContentCard /> */}
+      {/* <HeroHeader userId={userId} /> */}
       {userDashboardContents?.map((content: CreateContentInput) => (
         <ContentCard
           key={content.id}

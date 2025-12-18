@@ -32,6 +32,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
 import Link from "next/link";
@@ -57,14 +61,38 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {toast} from "sonner";
 import {createNewProject} from "@/app/actions/content";
 import userExists from "@/app/actions/getUser";
+import {NavMain} from "@/components/sidebar-check/nav-main";
+import {
+  AudioWaveform,
+  BookOpen,
+  Bot,
+  Command,
+  Frame,
+  GalleryVerticalEnd,
+  Map,
+  PieChart,
+  Settings2,
+  SquareTerminal,
+} from "lucide-react";
+
+import {ChevronRight, type LucideIcon} from "lucide-react";
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 // Menu items.
-const items = [
+const onlyitem = [
   {
     title: "Dashboard",
     url: "/dashboard",
     icon: Home,
   },
+];
+
+const items = [
   {
     title: "YouTube",
     url: "#",
@@ -95,6 +123,8 @@ const projects = [
   },
 ];
 
+
+
 export const addTitleFormSchema = z.object({
   title: z
     .string()
@@ -102,7 +132,24 @@ export const addTitleFormSchema = z.object({
     .max(200, "Bug title must be at most 200 characters."),
 });
 
-export function AppSidebar({children}: {children?: React.ReactNode}) {
+interface ProjectItemsProps {
+    title: string;
+    url: string;
+    icon?: string;
+    
+    items?: {
+      title: string;
+      url: string;
+    }[];
+  };
+
+export function AppSidebar({
+  projectItems,
+  children,
+}: {
+  children: React.ReactNode;
+  projectItems: ProjectItemsProps[]
+}) {
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
 
   const pathname = usePathname();
@@ -114,59 +161,92 @@ export function AppSidebar({children}: {children?: React.ReactNode}) {
     },
   });
 
+  // Create New Project
   const onSubmit = async (data: z.infer<typeof addTitleFormSchema>) => {
     console.log("Creating new project...");
-    toast.loading("Creating new project...");
-    const user = await userExists();
-    if (!user) {
-      toast.error("User does not exist. Please log in.");
-      return;
+    const toastId = toast.loading("Creating new project...");
+    try {
+      const user = await userExists();
+      if (!user) {
+        toast.error("User does not exist. Please log in.", {id: toastId});
+        return;
+      }
+      const userId = user.user?.id;
+      if (!userId) {
+        toast.error("User ID not found. Please log in.", {id: toastId});
+        return;
+      }
+      await createNewProject({
+        title: data.title,
+        userId: userId, // Replace with actual user ID
+      });
+      toast.success(`${data.title} created successfully!`, {
+        id: toastId,
+        duration: 2000,
+      });
+      setIsCreateProjectOpen(false);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast.error("Failed to create project. Please try again.", {id: toastId});
     }
-    const userId = user.user?.id;
-    if (!userId) {
-      toast.error("User ID not found. Please log in.");
-      return;
-    }
-    await createNewProject({
-      title: data.title,
-      userId: userId, // Replace with actual user ID
-    });
-    toast.success("Project created successfully!");
-    setIsCreateProjectOpen(false);
   };
 
   return (
     <Sidebar>
       <SidebarHeader>
-        <SidebarMenu>
+        {/* <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
-              <SidebarMenuButton className="h-auto -my-2">
-                <Image
-                  src={
-                    "https://ik.imagekit.io/mrityunjay/your_brain__3_-removebg-preview.png?updatedAt=1763637324508"
-                  }
-                  alt=""
-                  width={125}
-                  height={50}
-                  className="block dark:hidden"
-                />
-                <Image
-                  src="https://ik.imagekit.io/mrityunjay/1k_+-removebg-preview.png"
-                  alt="logo-dark"
-                  width={150}
-                  height={50}
-                  className="hidden dark:block"
-                />
-              </SidebarMenuButton>
+              <SidebarMenuButton className="h-auto -my-2"> */}
+        <Image
+          src={
+            "https://ik.imagekit.io/mrityunjay/your_brain__3_-removebg-preview.png?updatedAt=1763637324508"
+          }
+          alt=""
+          width={125}
+          height={50}
+          className="block dark:hidden"
+        />
+        <Image
+          src="https://ik.imagekit.io/mrityunjay/1k_+-removebg-preview.png"
+          alt="logo-dark"
+          width={150}
+          height={50}
+          className="hidden dark:block"
+        />
+        {/* </SidebarMenuButton>
             </DropdownMenu>
           </SidebarMenuItem>
-        </SidebarMenu>
+        </SidebarMenu> */}
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="thin-scrollbar">
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {onlyitem.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      href={item.url}
+                      className={cn(
+                        "hover:bg-blue-200 transition-colors px-2 py-1 rounded-lg", // default
+                        pathname === item.url &&
+                          "bg-blue-700 text-white hover:bg-blue-600"
+                      )}
+                    >
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Application Category</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -189,7 +269,8 @@ export function AppSidebar({children}: {children?: React.ReactNode}) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
+
+        {/* <SidebarGroup>
           <SidebarGroupLabel>Your Projects</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -211,13 +292,68 @@ export function AppSidebar({children}: {children?: React.ReactNode}) {
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
+        </SidebarGroup> */}
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Your Projects</SidebarGroupLabel>
+          <SidebarMenu>
+            {projectItems.map((item) => (
+              <Collapsible
+                key={item.title}
+                asChild
+                // defaultOpen={item.isActive}
+                className="group/collapsible"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip={item.title}>
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pl-2.5">
+                    <SidebarGroupLabel>Project Brains</SidebarGroupLabel>
+                    <SidebarMenuSub>
+                      {item.items?.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild>
+                            <a href={subItem.url}>
+                              <span>{subItem.title}</span>
+                            </a>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                    <SidebarSeparator />
+                    <SidebarGroupLabel>ProjectNote</SidebarGroupLabel>
+                    <SidebarMenuSub>
+                      {item.items?.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild>
+                            <a href={subItem.url}>
+                              <span>{subItem.title}</span>
+                            </a>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            ))}
+          </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
 
+      {/* Create Project Button */}
       <SidebarFooter>
         <SidebarMenuItem>
           <SidebarMenuButton>
-            <div onClick={() => setIsCreateProjectOpen(true)}>
+            <div
+              onClick={() => setIsCreateProjectOpen(true)}
+              className="hover:cursor-pointer"
+            >
               <span className="flex gap-1 items-center font-medium">
                 <Plus className="size-5 font-light" /> Create Project
               </span>
@@ -284,7 +420,8 @@ export function AppSidebar({children}: {children?: React.ReactNode}) {
           </DialogFooter> */}
         </DialogContent>
       </Dialog>
-      {children}
+
+      <SidebarFooter>{children}</SidebarFooter>
       {/* <Footer>
 
         </Footer> */}

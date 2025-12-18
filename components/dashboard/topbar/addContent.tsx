@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,19 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
-import {Brain, Link as LinkIcon, Plus, Share2, Trash2, X} from "lucide-react";
+import {
+  Brain,
+  ChartNoAxesGantt,
+  GitBranch,
+  GitBranchIcon,
+  Kanban,
+  Link as LinkIcon,
+  PlaneTakeoff,
+  Plus,
+  Share2,
+  Trash2,
+  X,
+} from "lucide-react";
 import z from "zod";
 import {Controller, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -26,11 +38,16 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "@/components/ui/input-group";
-import {addContent, getContentsByUserId} from "@/app/actions/content";
+import {
+  addContent,
+  getContentsByUserId,
+  getProjectsByUserId,
+} from "@/app/actions/content";
 import userExists from "@/app/actions/getUser";
 import {useRouter} from "next/navigation";
 import ProjectsAddDropdown from "../card/projects-dropdown";
 import LinkCategoryDropdown from "../card/link-category-dropdown";
+import { BsFolderPlus } from "react-icons/bs";
 
 // Initial data
 const initialCardData = {
@@ -55,21 +72,96 @@ export const formSchema = z.object({
     .max(100, "Link must not exceed 100 char in length"),
 });
 
+interface ActionsSampleProps {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  description: string;
+  short: string;
+  end: React.ReactNode;
+}
+
+const LOADING_STATE_FOR_PROJECTS: ActionsSampleProps[] = [
+  {
+    id: "loading",
+    label: "Loading projects…",
+    icon: <BsFolderPlus className="h-4 w-4 text-zinc-500 animate-pulse" />,
+    description: "",
+    short: "",
+    end: <Plus className="w-3.5 h-3.5 opacity-50" />,
+  },
+];
+
 export function AddContent() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [cardData, setCardData] = useState(initialCardData);
-
+  const [allActionsSample, setAllActionSample] = useState<ActionsSampleProps[]>(
+    LOADING_STATE_FOR_PROJECTS
+  );
   // Form state
   const [formData, setFormData] = useState(initialCardData);
   const [descCharCount, setDescCharCount] = useState(
     initialCardData.description.length
   );
 
+  // let allActionsSample: ActionsSampleProps[] = [
+  //   {
+  //     id: "1",
+  //     label: "Loading...",
+  //     icon: <PlaneTakeoff className="h-4 w-4 text-blue-500" />,
+  //     description: "",
+  //     short: "",
+  //     end: <Plus className="w-3.5 h-3.5" />,
+  //   },
+  // {
+  //   id: "1",
+  //   label: "Book tickets",
+  //   icon: <PlaneTakeoff className="h-4 w-4 text-blue-500" />,
+  //   description: "",
+  //   short: "",
+  //   end: <Plus className="w-3.5 h-3.5" />,
+  // },
+  // {
+  //   id: "1",
+  //   label: "Not Book tickets",
+  //   icon: <PlaneTakeoff className="h-4 w-4 text-blue-500" />,
+  //   description: "",
+  //   short: "",
+  //   end: <Plus className="w-3.5 h-3.5" />,
+  // },
+  // ];
+
   // Open dialog logic
-  const handleCardClick = () => {
+  const handleCardClick = async () => {
+    setIsDialogOpen(true);
+    const user = await userExists();
+    if (!user) {
+      toast.error("User does not exist. Please log in.");
+      return;
+    }
+    const userId = user.user?.id;
+    if (!userId) {
+      toast.error("User ID not found. Please log in.");
+      return;
+    }
     setFormData(cardData);
     setDescCharCount(cardData.description.length);
-    setIsDialogOpen(true);
+
+
+    // Logic to start loading the user's project info to display in dropdown, so that if feels instant after clicking to search
+    const userProjects = await getProjectsByUserId(userId);
+    // console.log(userProjects.projects);
+
+    const userProjectsData = userProjects.projects.map((project) => ({
+      id: project.id,
+      label: project.projectsname,
+      icon: <BsFolderPlus className="h-3.5 w-3.5 text-zinc-500" />,
+      description: "",
+      short: "",
+      end: <Plus className="w-3.5 h-3.5" />,
+    }));
+
+    setAllActionSample(userProjectsData)
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -127,10 +219,11 @@ export function AddContent() {
 
     router.refresh();
   }
+
   return (
     // Outer container: Full screen height to center the card, but doesn't force card height
     <>
-      <div className="">
+      <div>
         <Button
           onClick={handleCardClick}
           variant="outline"
@@ -141,7 +234,7 @@ export function AddContent() {
         {/* --- Edit Dialog (Same as before) --- */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           {/* <Card className="w-full sm:max-w-md shadow-none border-0"> */}
-          <DialogContent className="overflow-y-auto">
+          <DialogContent className="overflow-y-auto max-h-7/8 thin-scrollbar">
             <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
               <FieldGroup>
                 <Controller
@@ -221,8 +314,9 @@ export function AddContent() {
                   )}
                 />
                 <div className="flex justify-between gap-5">
+                  
                   <LinkCategoryDropdown />
-                  <ProjectsAddDropdown />
+                  <ProjectsAddDropdown actions={allActionsSample} />
                 </div>
                 <div className="flex gap-5">
                   <Button

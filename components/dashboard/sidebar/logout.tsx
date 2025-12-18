@@ -19,9 +19,9 @@ export function LogOutDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      {/* <DialogTrigger asChild>
         <Button variant="outline" className="rounded-none border-0 bg-transparent w-full">Log Out</Button>
-      </DialogTrigger>
+      </DialogTrigger> */}
 
       <DialogContent>
         <DialogHeader>

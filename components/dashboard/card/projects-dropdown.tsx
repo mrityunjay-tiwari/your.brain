@@ -1,34 +1,26 @@
 "use client";
 
-/**
- * @author: @kokonutui
- * @description: A modern search bar component with action buttons and suggestions
- * @version: 1.0.0
- * @date: 2025-06-26
- * @license: MIT
- * @website: https://kokonutui.com
- * @github: https://github.com/kokonut-labs/kokonutui
- */
-
 import {useState, useEffect, useMemo, useCallback} from "react";
 import {Input} from "@/components/ui/input";
 import {motion, AnimatePresence} from "motion/react";
-import {
-  Search,
-  Send,
-  BarChart2,
-  Video,
-  PlaneTakeoff,
-  AudioLines,
-  LayoutGrid,
-  Plus,
-} from "lucide-react";
 import useDebounce from "@/hooks/use-debounce";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
-import { IoMdInformationCircleOutline } from "react-icons/io";
-import { HiFolderAdd } from "react-icons/hi";
-import { VscNewFolder } from "react-icons/vsc";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {Button} from "@/components/ui/button";
+import {VscNewFolder} from "react-icons/vsc";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {Field, FieldError, FieldGroup, FieldLabel} from "@/components/ui/field";
+import {Controller, useForm} from "react-hook-form";
+import z from "zod";
+import {addTitleFormSchema} from "../sidebar/sidebar";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {toast} from "sonner";
+import userExists from "@/app/actions/getUser";
+import {createNewProject} from "@/app/actions/content";
 
 interface Action {
   id: string;
@@ -78,22 +70,11 @@ const ANIMATION_VARIANTS = {
   },
 } as const;
 
-const allActionsSample = [
-  {
-    id: "1",
-    label: "Book tickets",
-    icon: <PlaneTakeoff className="h-4 w-4 text-blue-500" />,
-    description: "",
-    short: "",
-    end: <Plus className="w-3.5 h-3.5" />,
-  },
-];
-
 function ProjectsAddDropdown({
-  actions = allActionsSample,
+  actions,
   defaultOpen = false,
 }: {
-  actions?: Action[];
+  actions: Action[];
   defaultOpen?: boolean;
 }) {
   const [query, setQuery] = useState("");
@@ -103,6 +84,7 @@ function ProjectsAddDropdown({
   const [selectedAction, setSelectedAction] = useState<Action | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const debouncedQuery = useDebounce(query, 200);
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
 
   const filteredActions = useMemo(() => {
     if (!debouncedQuery) return actions;
@@ -182,6 +164,45 @@ function ProjectsAddDropdown({
     }, 200);
   }, []);
 
+  const form = useForm<z.infer<typeof addTitleFormSchema>>({
+    resolver: zodResolver(addTitleFormSchema),
+    defaultValues: {
+      title: "",
+    },
+  });
+
+  // Create New Project
+  const onSubmit = async (
+    data: z.infer<typeof addTitleFormSchema>
+  ) => {
+    console.log("Creating new project...");
+    const toastId = toast.loading("Creating new project...");
+    try {
+      const user = await userExists();
+      if (!user) {
+        toast.error("User does not exist. Please log in.", {id: toastId});
+        return;
+      }
+      const userId = user.user?.id;
+      if (!userId) {
+        toast.error("User ID not found. Please log in.", {id: toastId});
+        return;
+      }
+      await createNewProject({
+        title: data.title,
+        userId: userId, // Replace with actual user ID
+      });
+      toast.success(`${data.title} created successfully!`, {
+        id: toastId,
+        duration: 2000,
+      });
+      setIsCreateProjectOpen(false);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast.error("Failed to create project. Please try again.", {id: toastId});
+    }
+  };
+
   return (
     <div className="w-full ">
       <div className="relative flex flex-col justify-start items-center">
@@ -241,15 +262,15 @@ function ProjectsAddDropdown({
                 <TooltipTrigger asChild>
                   <Button
                     className="hover:text-gray-100 hover:cursor-pointer text-gray-400 bg-transparent p-0 hover:bg-transparent"
-                    size={'icon-xs'}
+                    size={"icon-xs"}
+                    onClick={() => setIsCreateProjectOpen(true)}
+                    type="button"
                   >
                     <VscNewFolder className="text-zinc-500 h-4 w-4 scale-[1] origin-center" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="">
-                    Add to New Project
-                  </p>
+                  <p className="">Add to New Project</p>
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -331,6 +352,56 @@ function ProjectsAddDropdown({
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Create New Project Dialog */}
+      <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+          </DialogHeader>
+          <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
+            <FieldGroup>
+              <Controller
+                name="title"
+                control={form.control}
+                render={({field, fieldState}) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel
+                      htmlFor="form-rhf-demo-title"
+                      className="font-normal"
+                    >
+                      Title
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      // id="form-rhf-demo-title"
+                      // aria-invalid={fieldState.invalid}
+                      placeholder="Put project title here"
+                      // autoComplete="off"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              <div className="flex gap-5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => form.reset()}
+                >
+                  Reset
+                </Button>
+                <Button type="submit" form="form-rhf-demo">
+                  Submit
+                </Button>
+              </div>
+            </FieldGroup>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
