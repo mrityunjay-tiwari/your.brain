@@ -31,7 +31,6 @@ import {
   deleteIndividualShareLinkHashContentById,
   updateContentById,
 } from "@/app/actions/content";
-import {ContentType} from "@/lib/generated/prisma/enums";
 import {useRouter} from "next/navigation";
 import {toast} from "sonner";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
@@ -54,7 +53,6 @@ interface CreateContentInput {
   id: string;
   createdAt: Date;
   link: string;
-  type: ContentType;
   title: string;
   description: string;
   userId: string;
@@ -125,7 +123,6 @@ export default function ContentCard(data: CreateContentInput) {
       title: formData.title,
       description: formData.description,
       link: formData.link,
-      type: "article",
       userId: userId,
     });
     toast.success("Content updated successfully!");

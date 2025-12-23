@@ -27,6 +27,7 @@ model User {
   contents            content[]
   entireBrainLinkHash entireBrainLinkHash?
   projects            Project[]
+  websiteCategory     WebsiteCategory[]
 }
 
 model Account {
@@ -65,21 +66,14 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
-enum ContentType {
-  link
-  tweet
-  blog
-  article
-  post
-  youtube
-}
-
 model content {
-  id                  String              @id @default(cuid())
-  title               String
-  description         String
-  link                String
-  type                ContentType
+  id                String          @id @default(cuid())
+  title             String
+  description       String
+  link              String
+  websiteCategoryId String
+  websiteCategory   WebsiteCategory @relation(fields: [websiteCategoryId], references: [id])
+
   userId              String
   tweetId             String?
   user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -90,20 +84,20 @@ model content {
   project             ProjectsContent[]
 }
 
-model individualLinkHash {
-  id        String   @id @default(cuid())
-  contentId String   @unique
-  content   content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+model WebsiteCategory {
+  id          String  @id @default(cuid())
+  key         String 
+  displayName String 
+  icon        String?
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-model entireBrainLinkHash {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  contents  content[]
+  domains   String[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([userId, key])
 }
 
 model Project {
@@ -143,6 +137,22 @@ model ProjectChat {
   id        String   @id @default(cuid())
   projectId String   @unique
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model individualLinkHash {
+  id        String   @id @default(cuid())
+  contentId String   @unique
+  content   content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model entireBrainLinkHash {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -21,7 +21,7 @@ import {
   Settings2,
   SquareTerminal,
 } from "lucide-react";
-import { getProjectBrainCardsByProjectId, getProjectsByUserId } from "../actions/content";
+import { getProjectBrainCardsByProjectId, getProjectsByUserId, getWebsiteCategoryTypes } from "../actions/content";
 
 // export default function Layout({children}: {children: ReactNode}) {
 //   return (
@@ -152,18 +152,23 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
   const userProjects = await getProjectsByUserId(userId)
   userProjects.projects.map(async(project) => {
-    console.log(`${project.id} : ${project.projectsname}`);
-    
-    
-    
+    console.log(`${project.id} : ${project.projectsname}`);    
   })
+
+  const websiteArray = await getWebsiteCategoryTypes(userId);
+
+  const websiteItems = websiteArray.map((category) => ({
+  title: category.displayName,
+  url: `/${category.key}`, // 🔥 routing source of truth
+}));
+
   return (
     <SidebarProvider>
       <div className="flex h-screen w-screen gap-1 bg-muted p-0.5 overflow-hidden">
 
         {/* Sidebar */}
         <div className="shrink-0">
-          <AppSidebar projectItems={data.navMain}>
+          <AppSidebar items={websiteItems} projectItems={data.navMain}>
             <Footer />
           </AppSidebar>
         </div>

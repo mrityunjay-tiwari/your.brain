@@ -20,6 +20,7 @@ import {
   GitBranchIcon,
   Kanban,
   Link as LinkIcon,
+  Pencil,
   PlaneTakeoff,
   Plus,
   Share2,
@@ -40,6 +41,7 @@ import {
 } from "@/components/ui/input-group";
 import {
   addContent,
+  detectWebsiteCategory,
   getContentsByUserId,
   getProjectsByUserId,
 } from "@/app/actions/content";
@@ -47,7 +49,11 @@ import userExists from "@/app/actions/getUser";
 import {useRouter} from "next/navigation";
 import ProjectsAddDropdown from "../card/projects-dropdown";
 import LinkCategoryDropdown from "../card/link-category-dropdown";
-import { BsFolderPlus } from "react-icons/bs";
+import {BsFolderPlus} from "react-icons/bs";
+import {detectWebsite, getWebsiteFromUrl} from "@/utils/detect-hostname";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {slugify} from "@/utils/sluger";
+import {prisma} from "@/prisma/src";
 
 // Initial data
 const initialCardData = {
@@ -69,8 +75,27 @@ export const formSchema = z.object({
   link: z
     .string()
     .min(1, "Link must have at least 1 character")
-    .max(100, "Link must not exceed 100 char in length"),
+    .max(200, "Link must not exceed 200 char in length"),
+  app_category: z
+    .string()
+    .min(1, "App Category must be defined")
+    .max(20, "App category must not be of length more than 20"),
 });
+
+// export const tempformSchema = z.object({
+//   title: z
+//     .string()
+//     .min(0, "Bug title must be at least 1 characters.")
+//     .max(200, "Bug title must be at most 200 characters."),
+//   description: z
+//     .string()
+//     .min(0, "Description must be at least 1 characters.")
+//     .max(1000, "Description must be at most 1000 characters."),
+//   link: z
+//     .string()
+//     .min(1, "Link must have at least 1 character")
+//     .max(100, "Link must not exceed 100 char in length"),
+// });
 
 interface ActionsSampleProps {
   id: string;
@@ -103,6 +128,9 @@ export function AddContent() {
   const [descCharCount, setDescCharCount] = useState(
     initialCardData.description.length
   );
+  const [appCategory, setAppCategory] = useState("");
+  const [userCategoryDefine, setUserCategoryDefine] = useState<boolean>(true);
+  const appCategoryInputRef = React.useRef<HTMLInputElement | null>(null);
 
   // let allActionsSample: ActionsSampleProps[] = [
   //   {
@@ -131,9 +159,9 @@ export function AddContent() {
   // },
   // ];
 
-  // Open dialog logic
   const handleCardClick = async () => {
     setIsDialogOpen(true);
+
     const user = await userExists();
     if (!user) {
       toast.error("User does not exist. Please log in.");
@@ -144,13 +172,12 @@ export function AddContent() {
       toast.error("User ID not found. Please log in.");
       return;
     }
+
     setFormData(cardData);
     setDescCharCount(cardData.description.length);
 
-
     // Logic to start loading the user's project info to display in dropdown, so that if feels instant after clicking to search
     const userProjects = await getProjectsByUserId(userId);
-    // console.log(userProjects.projects);
 
     const userProjectsData = userProjects.projects.map((project) => ({
       id: project.id,
@@ -161,7 +188,25 @@ export function AddContent() {
       end: <Plus className="w-3.5 h-3.5" />,
     }));
 
-    setAllActionSample(userProjectsData)
+    setAllActionSample(userProjectsData);
+  };
+
+  const refreshProjects = async () => {
+    const user = await userExists();
+    if (!user?.user?.id) return;
+
+    const userProjects = await getProjectsByUserId(user.user.id);
+
+    const userProjectsData = userProjects.projects.map((project) => ({
+      id: project.id,
+      label: project.projectsname,
+      icon: <BsFolderPlus className="h-3.5 w-3.5 text-zinc-500" />,
+      description: "",
+      short: "",
+      end: <Plus className="w-3.5 h-3.5" />,
+    }));
+
+    setAllActionSample(userProjectsData);
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -170,22 +215,27 @@ export function AddContent() {
       title: "",
       description: "",
       link: "",
+      app_category: "",
     },
   });
 
+  // For using inside the onSubmit function
   const router = useRouter();
+
+  // On submitting the form after adding all the content
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log("submitted");
-    console.log("Title : ", data.title);
-    console.log("Description : ", data.description);
-    console.log("Link : ", data.link);
+    // console.log("submitted");
+    // console.log("Title : ", data.title);
+    // console.log("Description : ", data.description);
+    // console.log("Link : ", data.link);
 
     setIsDialogOpen(false);
 
+    // Reminds user about what all the values they submitted
     toast("You submitted the following values:", {
       description: (
         <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-          <code>{JSON.stringify(data, null, 2)}</code>
+          {JSON.stringify(data, null, 2)}
         </pre>
       ),
       position: "bottom-right",
@@ -197,6 +247,8 @@ export function AddContent() {
       } as React.CSSProperties,
     });
 
+    // Adding to the database
+    // Verifying the user
     const user = await userExists();
     if (!user) {
       toast.error("User does not exist. Please log in.");
@@ -208,17 +260,67 @@ export function AddContent() {
       return;
     }
 
+    const categoryDisplayName = data.app_category;
+
+    const categoryKey =
+      appCategory && appCategory.length > 0
+        ? appCategory // auto-detected
+        : slugify(categoryDisplayName);
+
     await addContent({
       title: data.title,
       description: data.description,
       link: data.link,
-      type: "article",
+      categoryKey,
+      categoryDisplayName,
       userId: userId,
     });
+
+    const hostname = new URL(data.link).hostname
+      .replace(/^www\./, "")
+      .toLowerCase();
+
+
     toast.success("Content added successfully!");
 
+    // To show the latest added content to the user's dashboard without them need to refresh the page
     router.refresh();
   }
+
+  const handleLinkOnchange = async (link: string) => {
+    // console.log(link);
+    // const websitename = await detectWebsite(link);
+    // console.log(websitename);
+
+    // const appCategory = await getWebsiteFromUrl(link);
+    // console.log(appCategory?.displayName);
+
+    const user = await userExists();
+    if (!user?.user?.id) return;
+
+    const detected = await detectWebsiteCategory(user.user.id, link);
+
+    if (detected) {
+      form.setValue("app_category", detected.displayName, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      setUserCategoryDefine(true);
+
+      setAppCategory(detected.key);
+    }
+    if (!appCategory) {
+      form.setError("app_category", {
+        type: "deps",
+        message: "Website not auto recognized. Please define the category.",
+      });
+
+      setUserCategoryDefine(false);
+      setAppCategory("");
+    }
+
+    return link;
+  };
 
   return (
     // Outer container: Full screen height to center the card, but doesn't force card height
@@ -272,6 +374,13 @@ export function AddContent() {
                         // id="form-rhf-demo-link"
                         // aria-invalid={fieldState.invalid}
                         placeholder="Put your content link here"
+                        onChange={(e) => {
+                          field.onChange(e); // ✅ VERY IMPORTANT
+
+                          const value = e.target.value;
+                          handleLinkOnchange(value);
+                        }}
+
                         // autoComplete="off"
                       />
                       {fieldState.invalid && (
@@ -313,16 +422,82 @@ export function AddContent() {
                     </Field>
                   )}
                 />
+
                 <div className="flex justify-between gap-5">
-                  
-                  <LinkCategoryDropdown />
-                  <ProjectsAddDropdown actions={allActionsSample} />
+                  {/* <LinkCategoryDropdown /> */}
+                  <Controller
+                    name="app_category"
+                    control={form.control}
+                    render={({field, fieldState}) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="form-rhf-demo-link">
+                          App Category
+                        </FieldLabel>
+                        <div className="flex -mt-1">
+                          <Input
+                            {...field}
+                            // id="form-rhf-demo-link"
+                            // aria-invalid={fieldState.invalid}
+                            placeholder="Define link category"
+                            readOnly={userCategoryDefine}
+                            ref={(el) => {
+                              field.ref(el); // ✅ keep react-hook-form working
+                              appCategoryInputRef.current = el;
+                            }}
+                            // autoComplete="on"
+                            className="rounded-r-none border-r-0"
+                          />
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant={"outline"}
+                                size={"icon"}
+                                className="border-l-0 rounded-l-none hover:cursor-pointer"
+                                onClick={() => {
+                                  setUserCategoryDefine(false);
+                                  setTimeout(() => {
+                                    appCategoryInputRef.current?.focus();
+                                  }, 0);
+                                }}
+                                type="button"
+                              >
+                                <Pencil className="text-zinc-500 scale-[1] origin-center" />{" "}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">
+                                Is Auto-Defined Category Wrong? Edit.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+
+                        {fieldState.invalid && (
+                          <FieldError
+                            className="text-xs"
+                            errors={[fieldState.error]}
+                          />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <ProjectsAddDropdown
+                    actions={allActionsSample}
+                    onProjectCreated={refreshProjects}
+                  />
                 </div>
                 <div className="flex gap-5">
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => form.reset()}
+                    onClick={() =>
+                      form.reset({
+                        title: "",
+                        description: "",
+                        link: "",
+                        app_category: "", // ✅ ensure reset
+                      })
+                    }
                   >
                     Reset
                   </Button>

@@ -92,23 +92,29 @@ const onlyitem = [
   },
 ];
 
-const items = [
-  {
-    title: "YouTube",
-    url: "#",
-    icon: YoutubeIcon,
-  },
-  {
-    title: "Twitter",
-    url: "#",
-    icon: Twitter,
-  },
-  {
-    title: "Medium",
-    url: "#",
-    icon: Notebook,
-  },
-];
+// const items = [
+//   {
+//     title: "YouTube",
+//     url: "#",
+//     icon: YoutubeIcon,
+//   },
+//   {
+//     title: "Twitter",
+//     url: "#",
+//     icon: Twitter,
+//   },
+//   {
+//     title: "Medium",
+//     url: "#",
+//     icon: Notebook,
+//   },
+// ];
+
+interface webstieCategory {
+  title: string;
+  url: string;
+  icon?: React.ReactNode;
+}
 
 const projects = [
   {
@@ -123,8 +129,6 @@ const projects = [
   },
 ];
 
-
-
 export const addTitleFormSchema = z.object({
   title: z
     .string()
@@ -133,22 +137,24 @@ export const addTitleFormSchema = z.object({
 });
 
 interface ProjectItemsProps {
+  title: string;
+  url: string;
+  icon?: string;
+
+  items?: {
     title: string;
     url: string;
-    icon?: string;
-    
-    items?: {
-      title: string;
-      url: string;
-    }[];
-  };
+  }[];
+}
 
 export function AppSidebar({
   projectItems,
   children,
+  items
 }: {
   children: React.ReactNode;
-  projectItems: ProjectItemsProps[]
+  projectItems: ProjectItemsProps[];
+  items: webstieCategory[]
 }) {
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
 
@@ -221,6 +227,7 @@ export function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent className="thin-scrollbar">
+        {/* Dashboard */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -245,6 +252,7 @@ export function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Application Category */}
         <SidebarGroup>
           <SidebarGroupLabel>Application Category</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -260,7 +268,7 @@ export function AppSidebar({
                           "bg-blue-700 text-white hover:bg-blue-600"
                       )}
                     >
-                      <item.icon />
+                      {item.icon}
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -294,6 +302,7 @@ export function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup> */}
 
+        {/* Your Projects */}
         <SidebarGroup>
           <SidebarGroupLabel>Your Projects</SidebarGroupLabel>
           <SidebarMenu>
@@ -428,3 +437,5 @@ export function AppSidebar({
     </Sidebar>
   );
 }
+
+

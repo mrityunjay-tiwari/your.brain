@@ -1,15 +1,16 @@
 // app/actions/add-content.ts
 "use server"
 
-import { ContentType } from "@/lib/generated/prisma/enums"
 import { prisma } from "@/prisma/src"
 import { auth } from "@/utils/auth"
+import { websiteCollection } from "@/utils/detect-hostname"
 
 type CreateContentInput = {
   link: string
-  type: ContentType
   title: string
   description: string
+categoryKey: string  
+  categoryDisplayName: string 
   userId: string
 }
 
@@ -20,13 +21,43 @@ export async function addContent(data: CreateContentInput) {
     throw new Error("Unauthorized")
   }
 
+  const userId = session.user.id
+
+  const hostname = new URL(data.link)
+    .hostname
+    .replace(/^www\./, "")
+    .toLowerCase();
+
+      const stableCategoryKey = hostname.replace(/\./g, "-");
+
+    const category = await prisma.websiteCategory.upsert({
+    where: {
+      userId_key: {
+        userId,
+        key: stableCategoryKey,
+      },
+    },
+    update: {
+      displayName: data.categoryDisplayName,
+      domains: {
+        push: hostname, // ✅ LEARNING happens here
+      },
+    },
+    create: {
+      userId,
+      key: stableCategoryKey,
+      displayName: data.categoryDisplayName,
+      domains: [hostname], // ✅ First-time learning
+    },
+  });
+
   const contents = await prisma.content.create({
     data: {
       title: data.title,
       description: data.description,
       link: data.link,
-      type: data.type,
       userId: session.user.id,
+      websiteCategoryId: category.id,
     },
   })
 
@@ -246,4 +277,74 @@ export async function getProjectDetailsByProjectId(projectId: string) {
   //   project
   // }
 
+}
+
+export async function getWebsiteCategoryTypes(userId: string) {
+  return prisma.websiteCategory.findMany({
+    where: {
+      userId,
+      contents: { some: {} }, // 🔥 only categories with content
+    },
+    select: {
+      key: true,
+      displayName: true,
+    },
+    orderBy: { displayName: "asc" },
+  });
+}
+
+export async function getContentsByCategory(
+  userId: string,
+  categoryKey: string
+) {
+  return prisma.content.findMany({
+    where: {
+      userId,
+      websiteCategory: {
+        key: categoryKey,
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function detectWebsiteCategory(
+  userId: string,
+  link: string
+) {
+  const hostname = new URL(link)
+    .hostname
+    .replace(/^www\./, "")
+    .toLowerCase();
+
+  // 1️⃣ global
+  const global = websiteCollection.find(site =>
+    site.domains.some(
+      d => hostname === d || hostname.endsWith(`.${d}`)
+    )
+  );
+
+  if (global) {
+    return {
+      key: global.id,
+      displayName: global.displayName,
+    };
+  }
+
+  // 2️⃣ user learned
+  const userCategory = await prisma.websiteCategory.findFirst({
+    where: {
+      userId,
+      domains: { has: hostname },
+    },
+  });
+
+  if (userCategory) {
+    return {
+      key: userCategory.key,
+      displayName: userCategory.displayName,
+    };
+  }
+
+  return null;
 }

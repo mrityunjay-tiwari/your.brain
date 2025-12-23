@@ -21,6 +21,7 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {toast} from "sonner";
 import userExists from "@/app/actions/getUser";
 import {createNewProject} from "@/app/actions/content";
+import {useRouter} from "next/navigation";
 
 interface Action {
   id: string;
@@ -73,9 +74,11 @@ const ANIMATION_VARIANTS = {
 function ProjectsAddDropdown({
   actions,
   defaultOpen = false,
+  onProjectCreated,
 }: {
   actions: Action[];
   defaultOpen?: boolean;
+  onProjectCreated: () => Promise<void>;
 }) {
   const [query, setQuery] = useState("");
   //   const [result, setResult] = useState<SearchResult | null>(null);
@@ -171,10 +174,9 @@ function ProjectsAddDropdown({
     },
   });
 
+  const router = useRouter();
   // Create New Project
-  const onSubmit = async (
-    data: z.infer<typeof addTitleFormSchema>
-  ) => {
+  const onSubmit = async (data: z.infer<typeof addTitleFormSchema>) => {
     console.log("Creating new project...");
     const toastId = toast.loading("Creating new project...");
     try {
@@ -197,6 +199,9 @@ function ProjectsAddDropdown({
         duration: 2000,
       });
       setIsCreateProjectOpen(false);
+      setQuery(data.title);
+      
+      await onProjectCreated();
     } catch (error) {
       console.error("Error creating project:", error);
       toast.error("Failed to create project. Please try again.", {id: toastId});
@@ -208,7 +213,7 @@ function ProjectsAddDropdown({
       <div className="relative flex flex-col justify-start items-center">
         <div className="w-full  sticky top-0 bg-background z-10 pb-1">
           <label
-            className="text-sm font-medium text-gray-500 dark:text-white mb-1 block"
+            className="text-sm font-medium text-gray-500 dark:text-white mb-1.5 block"
             htmlFor="search"
           >
             Add to Your Projects
@@ -232,7 +237,7 @@ function ProjectsAddDropdown({
               }
               id="search"
               autoComplete="off"
-              className="pl-3 pr-9 py-1.5 h-9 text-sm rounded-lg focus-visible:ring-offset-0"
+              className="pl-3 pr-9 py-1.5 h-9 text-sm rounded-md focus-visible:ring-offset-0"
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4">
               {/* <AnimatePresence mode="popLayout">
@@ -359,7 +364,7 @@ function ProjectsAddDropdown({
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
           </DialogHeader>
-          <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)}>
+          <form id="form-rhf-demo2" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
               <Controller
                 name="title"
@@ -367,7 +372,7 @@ function ProjectsAddDropdown({
                 render={({field, fieldState}) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel
-                      htmlFor="form-rhf-demo-title"
+                      htmlFor="form-rhf-demo2-title"
                       className="font-normal"
                     >
                       Title
@@ -394,7 +399,7 @@ function ProjectsAddDropdown({
                 >
                   Reset
                 </Button>
-                <Button type="submit" form="form-rhf-demo">
+                <Button type="submit" form="form-rhf-demo2">
                   Submit
                 </Button>
               </div>

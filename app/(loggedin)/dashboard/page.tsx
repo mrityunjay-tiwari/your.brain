@@ -1,17 +1,17 @@
 import {
   createIndividualShareLinkHashContent,
   getContentsByUserId,
+  getWebsiteCategoryTypes,
 } from "@/app/actions/content";
 import userExists from "@/app/actions/getUser";
 import ContentCard from "@/components/dashboard/card/card";
 import { HeroHeader } from "@/components/dashboard/topbar/topbar";
-import {ContentType} from "@/lib/generated/prisma/enums";
 
 export interface CreateContentInput {
   id: string;
   createdAt: Date;
   link: string;
-  type: ContentType;
+
   title: string;
   description: string;
   userId: string;
@@ -26,7 +26,10 @@ export default async function DashboardPage() {
   }
 
   const userDashboardContents = await getContentsByUserId(userId); // Replace with actual data fetching logic
-
+  
+  const websiteArray = await getWebsiteCategoryTypes(userId);
+  console.log("websiteArray : ", websiteArray);
+  
   return (
     <div className="flex flex-row gap-3.5 overflow-x-auto overflow-y-hidden p-0 thin-scrollbar">
       {/* <ContentCard /> */}
@@ -38,7 +41,6 @@ export default async function DashboardPage() {
           title={content.title}
           description={content.description}
           link={content.link}
-          type={content.type}
           createdAt={content.createdAt}
           userId={userId}
         />
